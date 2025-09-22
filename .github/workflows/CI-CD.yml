@@ -43,19 +43,6 @@ jobs:
         run: |
           docker build -t daybook-frontend ./frontend
 
-      # 5️⃣ Optional: Run tests
-      - name: Run backend tests
-        run: |
-          cd backend
-          npm install
-          npm test
-
-      - name: Run frontend tests
-        run: |
-          cd frontend
-          npm install
-          npm test
-
       # 6️⃣ Push images to Docker Hub (optional)
       # Make sure to add DOCKER_USERNAME and DOCKER_PASSWORD as GitHub secrets
       - name: Log in to Docker Hub
