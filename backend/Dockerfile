@@ -1,23 +1,15 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18-alpine
-
-# Set working directory inside the container
+# Stage 1: install production deps
+FROM node:lts-alpine AS deps
 WORKDIR /app
-
-# Copy package.json and package-lock.json first (for caching)
 COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Install dependencies
-RUN npm install --production
-
-# Copy the rest of the backend code
-COPY . .
-
-# Expose backend port
-EXPOSE 3000
-
-# Set environment to production
+# Stage 2: runtime
+FROM node:lts-alpine AS runner
+WORKDIR /app
 ENV NODE_ENV=production
-
-# Start the app
+COPY package*.json ./
+COPY --from=deps /app/node_modules ./node_modules
+COPY src ./src
+EXPOSE 3000
 CMD ["node", "src/index.js"]
