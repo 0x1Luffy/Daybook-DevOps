@@ -11,6 +11,7 @@ on:
 jobs:
   build-and-scan:
     runs-on: ubuntu-latest
+
     services:
       mongo:
         image: mongo
@@ -23,11 +24,11 @@ jobs:
           --health-retries 5
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Node.js
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -37,15 +38,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Run tests (optional, if you have tests)
+      # 4️⃣ Run tests (optional, uncomment if you have tests)
       # - name: Run tests
-       # run: npm test --if-present
+      #   run: npm test --if-present
 
       # 5️⃣ SonarCloud Scan
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # needed for PR decoration
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # Required for PR decoration
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       # 6️⃣ Pre-build Trivy scan (filesystem + dependencies)
@@ -55,7 +56,7 @@ jobs:
           scan-type: fs
           scan-ref: .
           severity: HIGH,CRITICAL
-          format: 'table'
+          format: table
           output: trivy-fs-report.txt
 
       # 7️⃣ Build backend Docker image
@@ -73,7 +74,7 @@ jobs:
           scan-type: image
           image-ref: daybook-backend
           severity: HIGH,CRITICAL
-          format: 'table'
+          format: table
           output: trivy-backend-report.txt
 
       # 🔟 Trivy Scan (frontend image)
@@ -83,7 +84,7 @@ jobs:
           scan-type: image
           image-ref: daybook-frontend
           severity: HIGH,CRITICAL
-          format: 'table'
+          format: table
           output: trivy-frontend-report.txt
 
       # 1️⃣1️⃣ Upload Trivy Reports as Artifacts
