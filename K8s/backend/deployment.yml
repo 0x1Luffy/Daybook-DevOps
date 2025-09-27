@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: <your-dockerhub-username>/daybook-backend:latest
+          image: 0x1luffy/daybook-backend
           ports:
             - containerPort: 5000
           env:
