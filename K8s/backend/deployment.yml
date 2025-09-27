@@ -15,21 +15,19 @@ spec:
     spec:
       containers:
         - name: backend
-          image: 0x1luffy/daybook-backend
+          image: <your-dockerhub-username>/daybook-backend:latest
           ports:
             - containerPort: 5000
           env:
             - name: MONGO_URI
-              value: "mongodb://admin:password@mongo-service:27017"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend-service
-spec:
-  selector:
-    app: daybook-backend
-  ports:
-    - port: 5000
-      targetPort: 5000
-  type: NodePort
+              value: "mongodb://$(MONGO_USERNAME):$(MONGO_PASSWORD)@$(MONGO_HOST):27017/$(MONGO_DB)"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: daybook-secret
+                  key: JWT_SECRET
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: daybook-config
+                  key: NODE_ENV
