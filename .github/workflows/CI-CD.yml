@@ -42,6 +42,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # Required for PR decoration
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+         args: >
+           -Dsonar.projectKey=0x1Luffy_Daybook-DevOps
+           -Dsonar.organization=0x1luffy
 
       # 4️⃣ Pre-build Trivy scan (filesystem + dependencies)
       - name: Trivy FS Scan
