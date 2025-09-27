@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  security-events: write  # needed to upload SARIF to Security tab
+  security-events: write  # required for SARIF uploads to Code Scanning
 
 jobs:
   build-and-scan:
@@ -26,37 +26,33 @@ jobs:
           --health-retries 5
 
     steps:
-      # 1️⃣ Checkout repo (full history improves Sonar PR analysis)
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2️⃣ Set up Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
 
-      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ (Optional) Run tests
       # - name: Run tests
       #   run: npm test --if-present
 
-      # 5️⃣ Sonar analysis (SonarQube Server or SonarQube Cloud)
-      # For SonarCloud, set SONAR_TOKEN and ensure sonar-project.properties has sonar.projectKey and sonar.organization.
-      # Omit SONAR_HOST_URL for SonarCloud; set SONAR_HOST_URL for SonarQube Server.
+      # Sonar analysis (SonarCloud or SonarQube Server)
+      # For SonarCloud: set SONAR_TOKEN and project config (e.g., sonar-project.properties)
+      # For SonarQube Server: also set SONAR_HOST_URL
       - name: Sonar Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          # SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}   # uncomment only for self-hosted SonarQube
+          # SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}  # uncomment for self-hosted SonarQube
 
-      # 6️⃣ Cache Trivy DB to speed up scans on hosted runners
+      # Cache Trivy DB to speed up scans on hosted runners
       - name: Cache Trivy DB
         uses: actions/cache@v4
         with:
@@ -65,9 +61,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      # 7️⃣ Pre-build Trivy scan (filesystem + deps + misconfig + secrets)
+      # Trivy filesystem scan (vuln + misconfig + secrets) -> SARIF
       - name: Trivy FS Scan (SARIF)
-        uses: aquasecurity/trivy-action@v0.32.0
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           scan-type: fs
           scan-ref: .
@@ -76,24 +72,23 @@ jobs:
           ignore-unfixed: true
           format: sarif
           output: trivy-fs.sarif
-          exit-code: 0  # don't fail the pipeline here; gate later if desired
+          exit-code: 0
 
       - name: Upload FS SARIF to Security tab
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-fs.sarif
 
-      # 8️⃣ Build backend Docker image
+      # Build images with unique tags
       - name: Build backend image
         run: docker build -t daybook-backend:${{ github.sha }} ./backend
 
-      # 9️⃣ Build frontend Docker image
       - name: Build frontend image
         run: docker build -t daybook-frontend:${{ github.sha }} ./frontend
 
-      # 🔟 Trivy Scan (backend image)
+      # Trivy image scans -> SARIF
       - name: Trivy Scan Backend (SARIF)
-        uses: aquasecurity/trivy-action@v0.32.0
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           scan-type: image
           image-ref: daybook-backend:${{ github.sha }}
@@ -108,9 +103,8 @@ jobs:
         with:
           sarif_file: trivy-backend.sarif
 
-      # 1️⃣1️⃣ Trivy Scan (frontend image)
       - name: Trivy Scan Frontend (SARIF)
-        uses: aquasecurity/trivy-action@v0.32.0
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           scan-type: image
           image-ref: daybook-frontend:${{ github.sha }}
@@ -125,37 +119,27 @@ jobs:
         with:
           sarif_file: trivy-frontend.sarif
 
-      # 1️⃣2️⃣ Also save human-readable Trivy reports
-      - name: Export Trivy table reports
-        run: |
-          trivy --version || true
-          # Re-run format conversion from SARIF to table for artifacts (optional)
-          # Alternatively re-run scans with format=table if artifact needs exact CLI table output.
-          echo "FS, Backend, and Frontend SARIF are uploaded to Security tab; table artifacts are optional."
-
+      # Save SARIF artifacts as well (optional)
       - name: Upload Trivy Reports as Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-reports
+          name: trivy-sarif-reports
           path: |
             trivy-fs.sarif
             trivy-backend.sarif
             trivy-frontend.sarif
 
-      # 1️⃣3️⃣ Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 1️⃣4️⃣ Push backend image
       - name: Push backend image
         run: |
           docker tag daybook-backend:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/daybook-backend:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/daybook-backend:latest
 
-      # 1️⃣5️⃣ Push frontend image
       - name: Push frontend image
         run: |
           docker tag daybook-frontend:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/daybook-frontend:latest
