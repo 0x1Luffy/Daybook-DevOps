@@ -1,1 +1,32 @@
-
+# frontend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: daybook-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: daybook-frontend
+  template:
+    metadata:
+      labels:
+        app: daybook-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: 0x1luffy/daybook-frontend
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: daybook-frontend
+  ports:
+    - port: 3000
+      targetPort: 3000
+  type: NodePort
