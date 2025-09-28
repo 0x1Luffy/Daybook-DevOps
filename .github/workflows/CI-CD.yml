@@ -120,17 +120,25 @@ jobs:
           docker tag daybook-frontend ${{ secrets.DOCKER_USERNAME }}/daybook-frontend:$IMAGE_TAG
           docker push ${{ secrets.DOCKER_USERNAME }}/daybook-frontend:$IMAGE_TAG
 
-      # 1️⃣6️⃣ Deploy backend to Render with new tag
-     # - name: Deploy backend to Render
+    # 1️⃣6️⃣ Deploy backend to Render with new tag
+   #   - name: Deploy backend to Render
+    #    env:
+    #      RENDER_HOOK: ${{ secrets.RENDER_BACKEND_HOOK }}
+     #     IMG: docker.io/${{ secrets.DOCKER_USERNAME }}/daybook-backend:${{ github.sha }}
      #   run: |
-     #     curl -fsSL -X POST \
-     #     "${{ secrets.RENDER_BACKEND_HOOK }}?imgURL=docker.io/${{ secrets.DOCKER_USERNAME }}/daybook-backend:${{ github.sha }}"
+     #    curl -fsSLG "$RENDER_HOOK" \
+     #     --data-urlencode "imgURL=$IMG"
 
+          
       # 1️⃣6️⃣ Deploy frontend to Render with new tag
       - name: Deploy frontend to Render
+        env:
+          RENDER_HOOK: ${{ secrets.RENDER_FRONTEND_HOOK }}
+          IMG: docker.io/${{ secrets.DOCKER_USERNAME }}/daybook-frontend:${{ github.sha }}
         run: |
-          curl -fsSL -X POST \
-          "${{ secrets.RENDER_FRONTEND_HOOK }}?imgURL=docker.io/${{ secrets.DOCKER_USERNAME }}/daybook-frontend:${{ github.sha }}"
+         curl -fsSLG "$RENDER_HOOK" \
+          --data-urlencode "imgURL=$IMG"
+
 
       # 1️⃣3️⃣ Update K8s manifests with new image tags
       - name: Update Kubernetes Manifests
