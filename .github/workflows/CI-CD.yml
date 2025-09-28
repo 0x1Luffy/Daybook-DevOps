@@ -64,7 +64,10 @@ jobs:
 
       # 6️⃣ Build frontend Docker image
       - name: Build frontend image
-        run: docker build -t daybook-frontend ./frontend
+        run: |
+          docker build \
+            --build-arg NGINX_CONF=nginx.conf \
+            -t daybook-frontend ./frontend
 
       # 7️⃣ Trivy Scan (backend image)
       - name: Trivy Scan Backend
