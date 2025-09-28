@@ -118,8 +118,8 @@ jobs:
       - name: Update Kubernetes Manifests
         run: |
           IMAGE_TAG=${{ github.sha }}
-          sed -i "s|image: .*/daybook-frontend.*|image: ${{ secrets.DOCKER_USERNAME }}/daybook-frontend:$IMAGE_TAG|" ./K8s/frontend/frontend-deployment.yml
-          sed -i "s|image: .*/daybook-backend.*|image: ${{ secrets.DOCKER_USERNAME }}/daybook-backend:$IMAGE_TAG|" ./K8s/backend/backend-deployment.yml
+          sed -i "s|image: .*/daybook-frontend.*|image: ${{ secrets.DOCKER_USERNAME }}/daybook-frontend:$IMAGE_TAG|" ./K8s/frontend/deployment.yml
+          sed -i "s|image: .*/daybook-backend.*|image: ${{ secrets.DOCKER_USERNAME }}/daybook-backend:$IMAGE_TAG|" ./K8s/backend/deployment.yml
 
       # 1️⃣4️⃣ Commit and push manifest changes
       - name: Commit manifest updates
