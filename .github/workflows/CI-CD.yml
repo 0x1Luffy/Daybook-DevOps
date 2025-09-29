@@ -67,6 +67,7 @@ jobs:
         run: |
           docker build \
             --build-arg NGINX_CONF=nginx.conf \
+            --build-arg VITE_BACKEND_URL=${{ secrets.PROD_API_URL }} \
             -t daybook-frontend ./frontend
 
       # 7️⃣ Trivy Scan (backend image)
