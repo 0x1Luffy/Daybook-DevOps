@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: 0x1luffy/daybook-backend:b4e23726ca711725e8003e7421d5f19214815cb3
+        image: 0x1luffy/daybook-backend:de53d93391e38480774783ef60bdc994439c8d59
         ports:
         - containerPort: 5000
         env:
