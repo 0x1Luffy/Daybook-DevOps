@@ -13,7 +13,12 @@ RUN npm install
 # Copy the rest of the project
 COPY . .
 
-# Build the production files
+# Accept build arg for backend URL
+ARG VITE_BACKEND_URL
+# Make it available during npm run build
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+
+# Build the production files (Vite will pick up env vars starting with VITE_)
 RUN npm run build
 
 # Stage 2: Serve with Nginx
