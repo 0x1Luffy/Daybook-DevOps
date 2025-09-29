@@ -18,7 +18,7 @@ ARG VITE_BACKEND_URL
 # Make it available during npm run build
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
-# Build the production files (Vite will pick up env vars starting with VITE_)
+# Build the production files
 RUN npm run build
 
 # Stage 2: Serve with Nginx
