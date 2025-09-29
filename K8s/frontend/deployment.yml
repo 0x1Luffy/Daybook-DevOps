@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: 0x1luffy/daybook-frontend:51bb4bc8edd776bcca30939cd9d21738defdca07
+        image: 0x1luffy/daybook-frontend:b4e23726ca711725e8003e7421d5f19214815cb3
         ports:
         - containerPort: 3000
         env:
