@@ -30,7 +30,7 @@ const Home = () => {
               <p className="text-lg mt-4">
                 Hey! Great to have you here 😊 Log in to keep your entries safe,
                 private, and always within reach. Write freely, your thoughts
-                your way! 🚀✨ Testing for docker.
+                your way! 🚀✨ Testing for docker 2025.
               </p>
               <Link to="/entries" className="btn btn-primary mt-6">
                 Get Started
